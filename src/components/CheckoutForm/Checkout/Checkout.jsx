@@ -13,11 +13,24 @@ const Checkout = ({ cart, onCaptureCheckout, order, error }) => {
     const [checkoutToken, setCheckoutToken] = useState(null);
     const [activeStep, setActiveStep] = useState(0);
     const [shippingData, setShippingData] = useState({});
+    const [isFinished, setIsFinished] = useState(false);
     const classes = useStyles();
     const history = useHistory();
 
     const nextStep = () => setActiveStep((prevActiveStep) => prevActiveStep + 1);
     const backStep = () => setActiveStep((prevActiveStep) => prevActiveStep - 1);
+
+    const next = (data) => {
+        setShippingData(data);
+
+        nextStep();
+    }
+
+    const timeout = (data) => {
+        setTimeout(() => {
+            setIsFinished(true);
+        }, 3000);
+    }
 
     useEffect(() => {
         if (cart.id) {
@@ -41,7 +54,7 @@ const Checkout = ({ cart, onCaptureCheckout, order, error }) => {
         nextStep();
     };
 
-    let Confirmation = () => (order.customer ? (
+    let Confirmation = () => order.customer ? (
         <>
             <div>
                 <Typography variant="h5">Thank you for your purchase, {order.customer.firstname} {order.customer.lastname}!</Typography>
@@ -51,11 +64,20 @@ const Checkout = ({ cart, onCaptureCheckout, order, error }) => {
             <br />
             <Button component={Link} variant="outlined" type="button" to="/">Back to home</Button>
         </>
-    ) : (
-            <div className={classes.spinner}>
-                <CircularProgress />
+    ) : isFinished ? (
+        <>
+            <div>
+                <Typography variant="h5">Thank you for your purchase</Typography>
+                <Divider className={classes.divider} />
             </div>
-        ));
+            <br />
+            <Button component={Link} variant="outlined" type="button" to="/">Back to home</Button>
+        </>
+    ) : (
+                <div className={classes.spinner}>
+                    <CircularProgress />
+                </div >
+            );
 
     if (error) {
         Confirmation = () => (
@@ -69,7 +91,7 @@ const Checkout = ({ cart, onCaptureCheckout, order, error }) => {
 
     const Form = () => (activeStep === 0
         ? <AddressForm checkoutToken={checkoutToken} nextStep={nextStep} setShippingData={setShippingData} test={test} />
-        : <PaymentForm shippingData={shippingData} checkoutToken={checkoutToken} nextStep={nextStep} backStep={backStep} onCaptureCheckout={onCaptureCheckout} />);
+        : <PaymentForm shippingData={shippingData} checkoutToken={checkoutToken} nextStep={nextStep} backStep={backStep} onCaptureCheckout={onCaptureCheckout} timeout={timeout} />);
 
     return (
         <>
