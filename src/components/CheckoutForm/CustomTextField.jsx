@@ -10,6 +10,7 @@ const CustomTextField = ({ name, label }) => {
         <Grid item xs={12} sm={6}>
             <Controller
                 as={TextField}
+                defaultValue=""
                 control={control}
                 fullWidth
                 name={name}
